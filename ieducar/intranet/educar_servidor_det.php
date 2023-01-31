@@ -139,7 +139,11 @@ return new class extends clsDetalhe {
             $obj_nivel = new clsPmieducarSubnivel($registro['ref_cod_subnivel']);
             $det_nivel = $obj_nivel->detalhe();
 
-            $this->addDetalhe(['Nível', $det_nivel['nm_subnivel']]);
+            $this->addDetalhe(['Nível', $det_nivel['nm_subnivel']]);            
+        }
+
+        if ($registro['salario']) {
+            $this->addDetalhe(['Salário', number_format($registro['salario'], 2, ',', '.')]);
         }
 
         if ($registro['ref_cod_funcao']) {

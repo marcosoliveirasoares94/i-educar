@@ -9,6 +9,7 @@ class clsPmieducarServidor extends Model
     public $carga_horaria;
     public $data_cadastro;
     public $data_exclusao;
+    public $salario;
     public $ativo;
     public $ref_cod_instituicao;
     public $ref_cod_subnivel;
@@ -28,16 +29,17 @@ class clsPmieducarServidor extends Model
         $data_exclusao = null,
         $ativo = null,
         $ref_cod_instituicao = null,
-        $ref_cod_subnivel = null
+        $ref_cod_subnivel = null,
+        $salario = null
     ) {
         $db = new clsBanco();
         $this->_schema = 'pmieducar.';
         $this->_tabela = $this->_schema . 'servidor';
         $this->_campos_lista = $this->_todos_campos = 'cod_servidor, ref_idesco, carga_horaria, data_cadastro, data_exclusao, ativo, ref_cod_instituicao,ref_cod_subnivel,
-    pos_graduacao, curso_formacao_continuada, multi_seriado, tipo_ensino_medio_cursado
+    pos_graduacao, curso_formacao_continuada, multi_seriado, tipo_ensino_medio_cursado, salario
     ';
         $this->_campos_lista2 = $this->_todos_campos2 = 's.cod_servidor, s.ref_idesco, s.carga_horaria, s.data_cadastro, s.data_exclusao, s.ativo, s.ref_cod_instituicao,s.ref_cod_subnivel,
-    s.pos_graduacao, s.curso_formacao_continuada, s.multi_seriado, s.tipo_ensino_medio_cursado,
+    s.pos_graduacao, s.curso_formacao_continuada, s.multi_seriado, s.tipo_ensino_medio_cursado, s.salario,
     (SELECT replace(textcat_all(matricula),\' <br>\',\',\')
           FROM pmieducar.servidor_funcao sf
          WHERE s.cod_servidor = sf.ref_cod_servidor) as matricula_servidor
@@ -53,6 +55,9 @@ class clsPmieducarServidor extends Model
         if (is_numeric($carga_horaria)) {
             $this->carga_horaria = $carga_horaria;
         }
+        if (is_numeric($salario)) {
+            $this->salario = $salario;
+        }        
         if (is_string($data_cadastro)) {
             $this->data_cadastro = $data_cadastro;
         }
@@ -78,7 +83,7 @@ class clsPmieducarServidor extends Model
     public function cadastra()
     {
         if (is_numeric($this->cod_servidor) && is_numeric($this->carga_horaria) &&
-            is_numeric($this->ref_cod_instituicao)
+            is_numeric($this->ref_cod_instituicao && is_numeric($this->salario))
         ) {
             $db = new clsBanco();
             $campos = '';
@@ -120,6 +125,11 @@ class clsPmieducarServidor extends Model
                 $valores .= "{$gruda}'{$this->tipo_ensino_medio_cursado}'";
                 $gruda = ', ';
             }
+            if (is_numeric($this->salario)) {
+                $campos .= "{$gruda}salario";
+                $valores .= "{$gruda}'{$this->salario}'";
+                $gruda = ', ';
+            }            
             if (is_string($this->pos_graduacao)) {
                 $campos .= "{$gruda}pos_graduacao";
                 $valores .= "{$gruda}'{$this->pos_graduacao}'";
@@ -156,8 +166,8 @@ class clsPmieducarServidor extends Model
     {
         if (is_numeric($this->cod_servidor) && is_numeric($this->ref_cod_instituicao)) {
             $db = new clsBanco();
-            $gruda = '';
             $set = '';
+            $gruda = '';
 
             if (is_numeric($this->ref_idesco)) {
                 $set .= "{$gruda}ref_idesco = '{$this->ref_idesco}'";
@@ -171,6 +181,10 @@ class clsPmieducarServidor extends Model
                 $set .= "{$gruda}carga_horaria = '{$this->carga_horaria}'";
                 $gruda = ', ';
             }
+            if (is_numeric($this->salario)) {
+                $set .= "{$gruda}salario = '{$this->salario}'";
+                $gruda = ', ';
+            }            
             if (is_string($this->data_cadastro)) {
                 $set .= "{$gruda}data_cadastro = '{$this->data_cadastro}'";
                 $gruda = ', ';
@@ -241,6 +255,7 @@ class clsPmieducarServidor extends Model
      * @param int        $int_ref_cod_deficiencia     Código da deficiência do servidor
      * @param int        $int_ref_idesco              Código da escolaridade do servidor
      * @param int        $int_carga_horaria           Carga horária do servidor
+     * @param float      $float_salario               Salário do servidor
      * @param string     $date_data_cadastro_ini      Data de cadastro inicial (busca por intervalo >= ao valor)
      * @param string     $date_data_cadastro_fim      Data de cadastro final (busca por intervalo <= ao valor)
      * @param string     $date_data_exclusao_ini      Data da exclusão inicial (busca por intervalo >= ao valor)
@@ -340,6 +355,7 @@ class clsPmieducarServidor extends Model
         $int_ref_cod_deficiencia = null,
         $int_ref_idesco = null,
         $int_carga_horaria = null,
+        $float_salario = null,
         $date_data_cadastro_ini = null,
         $date_data_cadastro_fim = null,
         $date_data_exclusao_ini = null,
@@ -422,6 +438,10 @@ class clsPmieducarServidor extends Model
             $filtros .= "{$whereAnd} s.carga_horaria = '{$int_carga_horaria}'";
             $whereAnd = ' AND ';
         }
+        if (is_numeric($float_salario)) {
+            $filtros .= "{$whereAnd} s.salario = '{$float_salario}'";
+            $whereAnd = ' AND ';
+        }        
         if (is_string($date_data_cadastro_ini)) {
             $filtros .= "{$whereAnd} s.data_cadastro >= '{$date_data_cadastro_ini}'";
             $whereAnd = ' AND ';

@@ -30,6 +30,7 @@ return new class extends clsCadastro {
     public $tipo_ensino_medio_cursado;
     public $matricula = [];
     public $cod_servidor_funcao = [];
+    public $salario;
     public $total_horas_alocadas;
     public $cod_docente_inep;
     public $docente = false;
@@ -72,7 +73,7 @@ return new class extends clsCadastro {
             $registro = $obj->detalhe();
 
             if (empty($registro)) {
-                $this->simpleRedirect(url('intranet/educar_servidor_lst.php'));
+                return $this->simpleRedirect(url('intranet/educar_servidor_lst.php'));
             }
 
             if ($registro) {
@@ -305,6 +306,10 @@ return new class extends clsCadastro {
 
         $this->campoTabelaFim();
 
+        $this->salario = number_format($this->salario, 2, ',', '.');
+
+        $this->campoMonetario('salario', 'Salario', $this->salario, 20, 8, true);
+
         $horas = '00:00';
         if ($this->total_horas_alocadas) {
             $horas = $this->total_horas_alocadas . ':00';
@@ -476,7 +481,7 @@ JS;
 
         if ($obj->detalhe()) {
             $this->carga_horaria = str_replace(',', '.', $this->carga_horaria);
-            $obj = new clsPmieducarServidor($this->cod_servidor, null, $this->ref_idesco, $this->carga_horaria, null, null, 1, $this->ref_cod_instituicao);
+            $obj = new clsPmieducarServidor($this->cod_servidor, null, $this->ref_idesco, $this->carga_horaria, null, null, 1, $this->ref_cod_instituicao, $this->salario);
             $obj = $this->addCamposCenso($obj);
             $obj->multi_seriado = !is_null($this->multi_seriado);
 
@@ -548,7 +553,7 @@ JS;
         if ($this->ref_cod_instituicao == $this->ref_cod_instituicao_original) {
             $this->carga_horaria = str_replace(',', '.', $this->carga_horaria);
 
-            $obj = new clsPmieducarServidor($this->cod_servidor, null, $this->ref_idesco, $this->carga_horaria, null, null, 1, $this->ref_cod_instituicao);
+            $obj = new clsPmieducarServidor($this->cod_servidor, null, $this->ref_idesco, $this->carga_horaria, null, null, 1, $this->ref_cod_instituicao, null, str_replace(',', '.', str_replace('.', '', $this->salario)));
             $obj = $this->addCamposCenso($obj);
             $obj->multi_seriado = !is_null($this->multi_seriado);
             $editou = $obj->edita();

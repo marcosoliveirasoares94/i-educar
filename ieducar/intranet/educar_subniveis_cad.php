@@ -12,7 +12,9 @@ return new class extends clsCadastro {
     public $ref_usuario_cad;
     public $ref_cod_nivel_anterior;
     public $nm_nivel;
+    public $porcentagem;
     public $salario_base;
+    public $salario_base_nivel;
     public $data_cadastro;
     public $data_exclusao;
     public $ativo;
@@ -46,19 +48,20 @@ return new class extends clsCadastro {
                 $this->nm_categoria = $registro['nm_categoria_nivel'];
 
                 $this->nm_nivel = $lst_niveis['nm_nivel'];
+                $this->salario_base_nivel = $lst_niveis['salario_base'];
 
                 $obj_niveis = new clsPmieducarSubnivel();
                 $obj_niveis->setOrderby('cod_subnivel');
-                $lst_niveis = $obj_niveis->lista(null, null, null, null, $this->ref_cod_nivel, null, null, null, null, null, 1);
+                $lst_niveis = $obj_niveis->lista(null, null, null, null, $this->ref_cod_nivel, null, null, null, null, null, 1, null);
 
                 if ($lst_niveis) {
                     foreach ($lst_niveis as $id => $nivel) {
                         $id++;
                         $nivel['salario'] = number_format($nivel['salario'], 2, ',', '.');
-                        $this->cod_nivel[] = [$nivel['nm_subnivel'],$nivel['salario'],$id,$nivel['cod_subnivel']];
+                        $this->cod_nivel[] = [$nivel['nm_subnivel'],$nivel['salario'],$nivel['porcentagem'],$id,$nivel['cod_subnivel']];
                     }
                 } else {
-                    $this->cod_nivel[] = ['','','1',''];
+                    $this->cod_nivel[] = ['','','','1',''];
                 }
 
                 $retorno = 'Editar';
@@ -77,12 +80,14 @@ return new class extends clsCadastro {
     {
         $this->campoOculto('ref_cod_categoria', $this->ref_cod_categoria);
         $this->campoOculto('ref_cod_nivel', $this->ref_cod_nivel);
+        $this->campoOculto('salario_base_nivel', $this->salario_base_nivel);
         $this->campoRotulo('nm_categoria', 'Categoria', $this->nm_categoria);
         $this->campoRotulo('nm_nivel', 'Nível', $this->nm_nivel);
 
-        $this->campoTabelaInicio('tab01', 'Subníveis', ['Nome Subnível','Salário','Ordem'], $this->cod_nivel);
+        $this->campoTabelaInicio('tab01', 'Subníveis', ['Nome Subnível','Salário','Porcentagem','Ordem'], $this->cod_nivel);
         $this->campoTexto('nm_nivel', 'Nome Subnível', '', 30, 100, true);
-        $this->campoMonetario('salario_base', 'Salario Base', $this->salario_base, 10, 8, true);
+        $this->campoMonetario('salario_base', 'Salario Base', $this->salario_base, 20, 8, true);
+        $this->campoNumero('porcentagem', 'Porcentagem', '', 5, 5, false, false, false, false, false, false, false);
         $this->campoNumero('nr_nivel', 'Ordem', '1', 5, 5, false, false, false, false, false, false, true);
         $this->campoOculto('cod_nivel', '');
 
@@ -107,7 +112,7 @@ return new class extends clsCadastro {
         if ($this->nm_nivel) {
             $nivel_anterior = null;
             foreach ($this->nm_nivel as $id => $nm_nivel) {
-                $obj_nivel = new clsPmieducarSubnivel($this->cod_nivel[$id], $this->pessoa_logada, $this->pessoa_logada, $nivel_anterior, $this->ref_cod_nivel, $nm_nivel, null, null, 1, str_replace(',', '.', str_replace('.', '', $this->salario_base[$id])));
+                $obj_nivel = new clsPmieducarSubnivel($this->cod_nivel[$id], $this->pessoa_logada, $this->pessoa_logada, $nivel_anterior, $this->ref_cod_nivel, $nm_nivel, null, null, 1, str_replace(',', '.', str_replace('.', '', $this->salario_base[$id])), $this->porcentagem[$id]);
                 if ($obj_nivel->existe()) {
                     $obj_nivel->edita();
                     $nivel_anterior = $this->cod_nivel[$id];

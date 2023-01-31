@@ -14,14 +14,15 @@ class clsPmieducarSubnivel extends Model
     public $data_exclusao;
     public $ativo;
     public $salario;
+    public $porcentagem;
 
-    public function __construct($cod_subnivel = null, $ref_usuario_exc = null, $ref_usuario_cad = null, $ref_cod_subnivel_anterior = null, $ref_cod_nivel = null, $nm_subnivel = null, $data_cadastro = null, $data_exclusao = null, $ativo = null, $salario = null)
+    public function __construct($cod_subnivel = null, $ref_usuario_exc = null, $ref_usuario_cad = null, $ref_cod_subnivel_anterior = null, $ref_cod_nivel = null, $nm_subnivel = null, $data_cadastro = null, $data_exclusao = null, $ativo = null, $salario = null, $porcentagem = null)
     {
         $db = new clsBanco();
         $this->_schema = 'pmieducar.';
         $this->_tabela = "{$this->_schema}subnivel";
 
-        $this->_campos_lista = $this->_todos_campos = 'cod_subnivel, ref_usuario_exc, ref_usuario_cad, ref_cod_subnivel_anterior, ref_cod_nivel, nm_subnivel, data_cadastro, data_exclusao, ativo, salario';
+        $this->_campos_lista = $this->_todos_campos = 'cod_subnivel, ref_usuario_exc, ref_usuario_cad, ref_cod_subnivel_anterior, ref_cod_nivel, nm_subnivel, data_cadastro, data_exclusao, ativo, salario, porcentagem';
 
         if (is_numeric($ref_usuario_exc)) {
             $this->ref_usuario_exc = $ref_usuario_exc;
@@ -54,6 +55,9 @@ class clsPmieducarSubnivel extends Model
         if (is_numeric($salario)) {
             $this->salario = $salario;
         }
+        if (is_numeric($porcentagem)) {
+            $this->porcentagem = $porcentagem;
+        }        
     }
 
     /**
@@ -63,7 +67,7 @@ class clsPmieducarSubnivel extends Model
      */
     public function cadastra()
     {
-        if (is_numeric($this->ref_usuario_cad) && is_numeric($this->ref_cod_nivel) && is_numeric($this->salario)) {
+        if (is_numeric($this->ref_usuario_cad) && is_numeric($this->ref_cod_nivel) && is_numeric($this->salario) && is_numeric($this->porcentagem)) {
             $db = new clsBanco();
 
             $campos = '';
@@ -95,6 +99,11 @@ class clsPmieducarSubnivel extends Model
                 $valores .= "{$gruda}'{$this->salario}'";
                 $gruda = ', ';
             }
+            if (is_numeric($this->porcentagem)) {
+                $campos .= "{$gruda}porcentagem";
+                $valores .= "{$gruda}'{$this->porcentagem}'";
+                $gruda = ', ';
+            }            
             $campos .= "{$gruda}data_cadastro";
             $valores .= "{$gruda}NOW()";
             $gruda = ', ';
@@ -119,7 +128,6 @@ class clsPmieducarSubnivel extends Model
     {
         if (is_numeric($this->cod_subnivel) && is_numeric($this->ref_usuario_exc)) {
             $db = new clsBanco();
-            $gruda = '';
             $set = '';
 
             if (is_numeric($this->ref_usuario_exc)) {
@@ -157,6 +165,10 @@ class clsPmieducarSubnivel extends Model
                 $set .= "{$gruda}salario = '{$this->salario}'";
                 $gruda = ', ';
             }
+            if (is_numeric($this->porcentagem)) {
+                $set .= "{$gruda}porcentagem = '{$this->porcentagem}'";
+                $gruda = ', ';
+            }            
 
             if ($set) {
                 $db->Consulta("UPDATE {$this->_tabela} SET $set WHERE cod_subnivel = '{$this->cod_subnivel}'");
@@ -184,7 +196,7 @@ class clsPmieducarSubnivel extends Model
      *
      * @return array
      */
-    public function lista($int_cod_subnivel = null, $int_ref_usuario_exc = null, $int_ref_usuario_cad = null, $int_ref_cod_subnivel_anterior = null, $int_ref_cod_nivel = null, $str_nm_nivel = null, $date_data_cadastro_ini = null, $date_data_cadastro_fim = null, $date_data_exclusao_ini = null, $date_data_exclusao_fim = null, $bool_ativo = null, $int_salario = null)
+    public function lista($int_cod_subnivel = null, $int_ref_usuario_exc = null, $int_ref_usuario_cad = null, $int_ref_cod_subnivel_anterior = null, $int_ref_cod_nivel = null, $str_nm_nivel = null, $date_data_cadastro_ini = null, $date_data_cadastro_fim = null, $date_data_exclusao_ini = null, $date_data_exclusao_fim = null, $bool_ativo = null, $int_salario = null, $int_porcentagem = null)
     {
         $sql = "SELECT {$this->_campos_lista} FROM {$this->_tabela}";
         $filtros = '';
@@ -243,6 +255,10 @@ class clsPmieducarSubnivel extends Model
             $filtros .= "{$whereAnd} salario = '{$int_salario}'";
             $whereAnd = ' AND ';
         }
+        if (is_numeric($int_porcentagem)) {
+            $filtros .= "{$whereAnd} porcentagem = '{$int_porcentagem}'";
+            $whereAnd = ' AND ';
+        }        
 
         $db = new clsBanco();
         $countCampos = count(explode(',', $this->_campos_lista));
